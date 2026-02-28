@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panchāngam — Astronomical Foundation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Noto+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #f8f6f1;
+    --gold: #8a6a18;
+    --gold-dim: #a08030;
+    --sun: #d08a10;
+    --moon: #4a6080;
+    --tithi: #c05a2a;
+    --nak: #2a60b0;
+    --yoga: #7040b0;
+    --karana: #b84070;
+    --text: #2a2420;
+    --dim: #8a8078;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+  }
+
+  h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+    font-size: 2.2rem;
+    color: var(--gold);
+    text-align: center;
+    letter-spacing: 0.06em;
+    text-shadow: none;
+    margin-bottom: 4px;
+  }
+
+  .tagline {
+    text-align: center;
+    font-size: 0.82rem;
+    color: var(--dim);
+    letter-spacing: 0.15em;
+    margin-bottom: 30px;
+    font-style: italic;
+    font-family: 'Cormorant Garamond', serif;
+  }
+
+  /* Controls */
+  .controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .controls label {
+    font-size: 0.78rem;
+    color: var(--dim);
+    letter-spacing: 0.05em;
+  }
+
+  .slider-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 260px;
+    height: 4px;
+    background: #d0ccc4;
+    border-radius: 2px;
+    outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--gold);
+    cursor: pointer;
+    box-shadow: 0 0 6px #8a6a1830;
+  }
+
+  .day-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    color: var(--gold);
+    min-width: 60px;
+    text-align: center;
+  }
+
+  .play-btn {
+    background: none;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    padding: 5px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    font-family: 'Noto Sans', sans-serif;
+    transition: all 0.2s;
+  }
+  .play-btn:hover { background: #8a6a1815; }
+
+  /* SVG */
+  .diagram-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto 30px;
+  }
+
+  svg { width: 100%; height: auto; display: block; }
+
+  /* Info panels */
+  .panels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 10px;
+  }
+
+  @media (max-width: 600px) {
+    .panels { grid-template-columns: 1fr; }
+    input[type="range"] { width: 180px; }
+    h1 { font-size: 1.6rem; }
+  }
+
+  .panel {
+    background: #f0ede6;
+    border: 1px solid #d8d0c4;
+    border-radius: 10px;
+    padding: 18px 20px;
+    border-left: 3px solid;
+    transition: all 0.3s;
+  }
+  .panel:hover { background: #ebe8e0; }
+
+  .panel.tithi-panel  { border-left-color: var(--tithi); }
+  .panel.nak-panel    { border-left-color: var(--nak); }
+  .panel.yoga-panel   { border-left-color: var(--yoga); }
+  .panel.karana-panel  { border-left-color: var(--karana); }
+
+  .panel h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 500;
+    font-size: 1.05rem;
+    margin-bottom: 4px;
+    letter-spacing: 0.04em;
+  }
+  .panel.tithi-panel h3  { color: var(--tithi); }
+  .panel.nak-panel h3    { color: var(--nak); }
+  .panel.yoga-panel h3   { color: var(--yoga); }
+  .panel.karana-panel h3  { color: var(--karana); }
+
+  .panel .formula {
+    font-size: 0.78rem;
+    color: var(--dim);
+    margin-bottom: 6px;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    letter-spacing: 0.04em;
+  }
+
+  .panel .value {
+    font-size: 0.95rem;
+    color: var(--text);
+    font-weight: 400;
+  }
+
+  .panel .explain {
+    font-size: 0.75rem;
+    color: var(--dim);
+    margin-top: 6px;
+    line-height: 1.55;
+  }
+
+  .phase-icon {
+    display: inline-block;
+    font-size: 1.2rem;
+    vertical-align: middle;
+    margin-right: 4px;
+  }
+
+  /* Legend strip at bottom */
+  .legend {
+    margin-top: 36px;
+    padding: 20px 24px;
+    background: #f0ede6;
+    border: 1px solid #d8d0c4;
+    border-radius: 10px;
+  }
+  .legend h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 400;
+    color: var(--gold);
+    font-size: 1rem;
+    margin-bottom: 12px;
+    letter-spacing: 0.05em;
+  }
+  .legend p {
+    font-size: 0.78rem;
+    color: var(--dim);
+    line-height: 1.7;
+    margin-bottom: 8px;
+  }
+  .legend p strong { color: var(--text); font-weight: 500; }
+  .c-tithi { color: var(--tithi); }
+  .c-nak { color: var(--nak); }
+  .c-yoga { color: var(--yoga); }
+  .c-karana { color: var(--karana); }
+  .c-sun { color: var(--sun); }
+  .c-moon { color: var(--moon); }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Panchāngam</h1>
+<div class="tagline">One year · Watch the Moon orbit 13× while the Sun completes one full circle</div>
+
+<div class="controls">
+  <label>Day of Year</label>
+  <div class="slider-wrap">
+    <input type="range" id="daySlider" min="0" max="365" step="0.5" value="0">
+    <span class="day-label" id="dayLabel">Day 0</span>
+  </div>
+  <button class="play-btn" id="playBtn">▶ Animate</button>
+  <button class="play-btn" id="speedBtn">1×</button>
+</div>
+
+<div class="stats" id="statsBar" style="text-align:center; font-size:0.78rem; color:var(--dim); margin-bottom:16px; line-height:1.8;">
+  <span style="color:var(--moon)">☾ Moon orbits: <strong id="moonOrbCount">0</strong></span> &nbsp;·&nbsp;
+  <span style="color:var(--sun)">☉ Sun Nakshatras: <strong id="sunNakCount">0</strong>/27</span> &nbsp;·&nbsp;
+  <span style="color:#8a6a10">Sankramanas: <strong id="sankCount">0</strong>/12</span> &nbsp;·&nbsp;
+  <span style="color:var(--tithi)">Lunar months: <strong id="lunarMonthCount">0</strong></span>
+</div>
+
+<div class="diagram-wrap">
+  <svg id="mainSvg" viewBox="0 0 780 780" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="earthGrad" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#5a9a6a"/>
+        <stop offset="70%" stop-color="#3a7a50"/>
+        <stop offset="100%" stop-color="#2a5a38"/>
+      </radialGradient>
+      <radialGradient id="sunGrad" cx="40%" cy="40%" r="60%">
+        <stop offset="0%" stop-color="#ffe080"/>
+        <stop offset="60%" stop-color="#f0a830"/>
+        <stop offset="100%" stop-color="#c07010"/>
+      </radialGradient>
+      <radialGradient id="moonGrad" cx="40%" cy="40%" r="55%">
+        <stop offset="0%" stop-color="#d0d8e8"/>
+        <stop offset="70%" stop-color="#8898b8"/>
+        <stop offset="100%" stop-color="#506080"/>
+      </radialGradient>
+      <filter id="glow">
+        <feGaussianBlur stdDeviation="3" result="g"/>
+        <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="sunGlow">
+        <feGaussianBlur stdDeviation="8" result="g"/>
+        <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="softGlow">
+        <feGaussianBlur stdDeviation="2" result="g"/>
+        <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+
+    <!-- Rashi (Zodiac) outer ring -->
+    <g id="rashiRing"></g>
+
+    <!-- Nakshatra ring (27 divisions) -->
+    <g id="nakshatraRing"></g>
+
+    <!-- Moon orbit circle -->
+    <circle cx="390" cy="390" r="160" fill="none" stroke="#00000012" stroke-width="1" stroke-dasharray="4,6"/>
+
+    <!-- Angular arcs (drawn by JS) -->
+    <g id="arcsGroup"></g>
+
+    <!-- Sun direction indicator (far away, shown as ray) -->
+    <g id="sunGroup"></g>
+
+    <!-- Earth -->
+    <circle cx="390" cy="390" r="22" fill="url(#earthGrad)" stroke="#4a8a5a" stroke-width="1"/>
+    <text x="390" y="395" text-anchor="middle" fill="#2a5a38" font-size="9" font-family="Noto Sans" font-weight="400">Earth</text>
+
+    <!-- Moon -->
+    <g id="moonGroup">
+      <circle id="moonOrb" r="12" fill="url(#moonGrad)" filter="url(#softGlow)"/>
+      <text id="moonLabel" text-anchor="middle" dy="22" fill="#4a6080" font-size="8" font-family="Noto Sans">Moon</text>
+    </g>
+
+    <!-- Annotation labels drawn by JS -->
+    <g id="annotations"></g>
+  </svg>
+</div>
+
+<div class="panels">
+  <div class="panel tithi-panel">
+    <h3>Tithi <span style="font-size:0.75rem;color:var(--dim);font-weight:300">— Lunar Day</span></h3>
+    <div class="formula">Moon − Sun = angular separation ÷ 12°</div>
+    <div class="value" id="tithiValue">—</div>
+    <div class="explain" id="tithiExplain">How far has the Moon pulled ahead of the Sun? Every 12° of separation = 1 Tithi. This is what creates the waxing and waning — the Moon's phase you see in the sky.</div>
+  </div>
+
+  <div class="panel nak-panel">
+    <h3>Nakshatra <span style="font-size:0.75rem;color:var(--dim);font-weight:300">— Lunar Mansion</span></h3>
+    <div class="formula">Moon's position in the 27-star belt (each 13°20')</div>
+    <div class="value" id="nakValue">—</div>
+    <div class="explain" id="nakExplain">Where is the Moon against the 27 star-fields? <span style="color:var(--nak)">Blue</span> = Moon's Nakshatra (changes every ~1 day). <span style="color:#9a7a18">Gold</span> = Sun's Nakshatra (changes every ~13.5 days). Watch the Moon lap the Sun ~13 times in a year!</div>
+  </div>
+
+  <div class="panel yoga-panel">
+    <h3>Yoga <span style="font-size:0.75rem;color:var(--dim);font-weight:300">— Luni-Solar Day</span></h3>
+    <div class="formula">Moon + Sun = combined longitude ÷ 13°20'</div>
+    <div class="value" id="yogaValue">—</div>
+    <div class="explain" id="yogaExplain">ADD the Moon's position and the Sun's position together. The combined energy of both luminaries. Think of it as: "where is the centre of gravity of the sky's light?" Divides into 27 Yogas.</div>
+  </div>
+
+  <div class="panel karana-panel">
+    <h3>Karana <span style="font-size:0.75rem;color:var(--dim);font-weight:300">— Half Tithi</span></h3>
+    <div class="formula">Same as Tithi but ÷ 6° (half the resolution)</div>
+    <div class="value" id="karanaValue">—</div>
+    <div class="explain" id="karanaExplain">Zoom into the Tithi. Cut each Tithi in half = 2 Karanas per Tithi, 60 per lunar month. It's the same Moon−Sun angle, just measured at 6° precision instead of 12°. Gives you quarter-day timing.</div>
+  </div>
+</div>
+
+<!-- KEY INSIGHT -->
+<div class="legend">
+  <h3>The Elegant Geometry</h3>
+  <p>All four elements come from just <strong>two numbers</strong>: the <span class="c-sun">Sun's longitude</span> and the <span class="c-moon">Moon's longitude</span> as seen from Earth.</p>
+  <p><span class="c-tithi"><strong>Tithi</strong></span> = Moon <strong>minus</strong> Sun → How far apart are they? This is the DIFFERENCE. It gives you the Moon's phase — waxing, full, waning, new.</p>
+  <p><span class="c-nak"><strong>Nakshatra</strong></span> = Moon <strong>alone</strong> → Where is the Moon in the sky? Sun is irrelevant. Pure position against the 27 star-fields. One mansion per day.</p>
+  <p><span class="c-yoga"><strong>Yoga</strong></span> = Moon <strong>plus</strong> Sun → The SUM. Both luminaries' positions combined. Think of Tithi as "tension between Sun & Moon" and Yoga as "total light energy in the sky." Same 27 divisions as Nakshatra, but measuring something completely different.</p>
+  <p><span class="c-karana"><strong>Karana</strong></span> = <strong>Half</strong> of Tithi → Same formula as Tithi (Moon − Sun), just at double the resolution. 6° per Karana instead of 12° per Tithi. Like zooming in on your watch from hours to half-hours.</p>
+  <p style="margin-top:12px; color: var(--text); font-size: 0.82rem;">Together: <strong>subtraction</strong> (Tithi), <strong>position</strong> (Nakshatra), <strong>addition</strong> (Yoga), and <strong>half-subtraction</strong> (Karana) — they capture every possible angular relationship between Earth, Moon, and the stars. Nothing is left unmeasured.</p>
+  <p style="margin-top:12px; font-size: 0.78rem; color: var(--dim);">The <strong style="color:#8a6a10">outer ring</strong> shows the 12 Rāshis (30° each). The <strong style="color:var(--nak)">inner ring</strong> shows 27 Nakshatras (13°20' each). Both divide the same 360° sky — each Rāshi contains exactly 2¼ Nakshatras. When the Sun crosses from one Rāshi to the next, that moment is a <strong style="color:var(--text)">Sankramana</strong>. Makara Sankrānti = Sun entering Makara (Capricorn).</p>
+</div>
+
+</div>
+
+<script>
+const CX = 390, CY = 390, ORBIT_R = 160, NAK_R = 265, RASHI_R = 310;
+const SVG_NS = "http://www.w3.org/2000/svg";
+
+const TITHI_NAMES = [
+  "Pratipadā","Dvitīyā","Tritīyā","Chaturthī","Pañchamī","Shashthī","Saptamī",
+  "Ashṭamī","Navamī","Dashamī","Ekādashī","Dvādashī","Trayodashī","Chaturdashī","Pūrṇimā",
+  "Pratipadā","Dvitīyā","Tritīyā","Chaturthī","Pañchamī","Shashthī","Saptamī",
+  "Ashṭamī","Navamī","Dashamī","Ekādashī","Dvādashī","Trayodashī","Chaturdashī","Amāvāsyā"
+];
+
+const NAK_NAMES = [
+  "Ashwinī","Bharaṇī","Kṛttikā","Rohiṇī","Mṛgashīrā","Ārdrā","Punarvasu",
+  "Pushyamī","Āshleshā","Maghā","Pūrva Phalgunī","Uttara Phalgunī","Hasta",
+  "Chitrā","Svātī","Vishākhā","Anurādhā","Jyeshṭhā","Mūla","Pūrvāshāḍhā",
+  "Uttarāshāḍhā","Shravaṇa","Dhaniṣṭhā","Shatabhishā","Pūrvābhādrā",
+  "Uttarābhādrā","Revatī"
+];
+
+const YOGA_NAMES = [
+  "Vishkambha","Prīti","Āyushmān","Saubhāgya","Shobhana","Atigaṇḍa","Sukarma",
+  "Dhṛti","Shūla","Gaṇḍa","Vṛddhi","Dhruva","Vyāghāta","Harshana","Vajra",
+  "Siddhi","Vyatīpāta","Varīyāna","Parigha","Shiva","Siddha","Sādhya",
+  "Shubha","Shukla","Brahma","Indra","Vaidhṛti"
+];
+
+const KARANA_CYCLE = [
+  "Kiṁstughna","Bava","Bālava","Kaulava","Taitila","Garaja","Vaṇija","Vishṭi",
+  "Bava","Bālava","Kaulava","Taitila","Garaja","Vaṇija","Vishṭi",
+  "Bava","Bālava","Kaulava","Taitila","Garaja","Vaṇija","Vishṭi",
+  "Bava","Bālava","Kaulava","Taitila","Garaja","Vaṇija","Vishṭi",
+  "Bava","Bālava","Kaulava","Taitila","Garaja","Vaṇija","Vishṭi",
+  "Bava","Bālava","Kaulava","Taitila","Garaja","Vaṇija","Vishṭi",
+  "Bava","Bālava","Kaulava","Taitila","Garaja","Vaṇija","Vishṭi",
+  "Bava","Bālava","Kaulava","Taitila","Garaja","Vaṇija","Vishṭi",
+  "Shakuni","Chatushpāda","Nāgava","Kiṁstughna"
+];
+
+const MOON_PHASES = ['🌑','🌒','🌒','🌓','🌓','🌔','🌔','🌕','🌖','🌖','🌗','🌗','🌘','🌘','🌑'];
+
+const slider = document.getElementById('daySlider');
+const dayLabel = document.getElementById('dayLabel');
+const playBtn = document.getElementById('playBtn');
+const speedBtn = document.getElementById('speedBtn');
+let animating = false, animFrame = null;
+let speed = 1;
+const SPEEDS = [1, 2, 5, 10];
+let speedIdx = 0;
+
+speedBtn.addEventListener('click', () => {
+  speedIdx = (speedIdx + 1) % SPEEDS.length;
+  speed = SPEEDS[speedIdx];
+  speedBtn.textContent = speed + '×';
+});
+
+// Track counts
+let prevMoonNak = 0, prevSunNak = 0, prevSunRashi = 0;
+let moonOrbits = 0, sunNaks = 0, sankCount = 0;
+let lastDay = 0;
+
+const RASHI_NAMES = [
+  "Mesha","Vṛshabha","Mithuna","Karkāṭaka","Siṁha","Kanyā",
+  "Tulā","Vṛshchika","Dhanus","Makara","Kumbha","Mīna"
+];
+const RASHI_SYMBOLS = [
+  "♈","♉","♊","♋","♌","♍","♎","♏","♐","♑","♒","♓"
+];
+
+// Draw Rashi outer ring
+function drawRashiRing() {
+  const g = document.getElementById('rashiRing');
+  const segAngle = 360 / 12;
+  
+  for (let i = 0; i < 12; i++) {
+    const startA = (i * segAngle - 90) * Math.PI / 180;
+    const endA = ((i + 1) * segAngle - 90) * Math.PI / 180;
+    const midA = ((i + 0.5) * segAngle - 90) * Math.PI / 180;
+    
+    const innerR = RASHI_R - 8;
+    const outerR = RASHI_R + 18;
+    
+    const x1i = CX + innerR * Math.cos(startA);
+    const y1i = CY + innerR * Math.sin(startA);
+    const x2i = CX + innerR * Math.cos(endA);
+    const y2i = CY + innerR * Math.sin(endA);
+    const x1o = CX + outerR * Math.cos(startA);
+    const y1o = CY + outerR * Math.sin(startA);
+    const x2o = CX + outerR * Math.cos(endA);
+    const y2o = CY + outerR * Math.sin(endA);
+    
+    const path = document.createElementNS(SVG_NS, 'path');
+    path.setAttribute('d', 
+      `M ${x1i} ${y1i} A ${innerR} ${innerR} 0 0 1 ${x2i} ${y2i} L ${x2o} ${y2o} A ${outerR} ${outerR} 0 0 0 ${x1o} ${y1o} Z`
+    );
+    path.setAttribute('fill', i % 2 === 0 ? '#f4f0e8' : '#ece6dc');
+    path.setAttribute('stroke', '#b8b0a0');
+    path.setAttribute('stroke-width', '0.5');
+    path.setAttribute('id', `rashi-seg-${i}`);
+    g.appendChild(path);
+    
+    // Rashi label (name + symbol)
+    const labelR = RASHI_R + 38;
+    const lx = CX + labelR * Math.cos(midA);
+    const ly = CY + labelR * Math.sin(midA);
+    const rot = (i * segAngle + segAngle / 2);
+    
+    const text = document.createElementNS(SVG_NS, 'text');
+    text.setAttribute('x', lx);
+    text.setAttribute('y', ly);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('dominant-baseline', 'central');
+    text.setAttribute('fill', '#a09888');
+    text.setAttribute('font-size', '8');
+    text.setAttribute('font-family', 'Noto Sans');
+    text.setAttribute('font-weight', '400');
+    text.setAttribute('id', `rashi-label-${i}`);
+    
+    let textRot = rot;
+    if (textRot > 90 && textRot < 270) textRot += 180;
+    text.setAttribute('transform', `rotate(${textRot}, ${lx}, ${ly})`);
+    text.textContent = `${RASHI_SYMBOLS[i]} ${RASHI_NAMES[i]}`;
+    g.appendChild(text);
+    
+    // Dividing line from inner to nakshatra ring
+    const divLine = document.createElementNS(SVG_NS, 'line');
+    divLine.setAttribute('x1', CX + innerR * Math.cos(startA));
+    divLine.setAttribute('y1', CY + innerR * Math.sin(startA));
+    divLine.setAttribute('x2', CX + outerR * Math.cos(startA));
+    divLine.setAttribute('y2', CY + outerR * Math.sin(startA));
+    divLine.setAttribute('stroke', '#a09888');
+    divLine.setAttribute('stroke-width', '0.5');
+    g.appendChild(divLine);
+  }
+}
+
+// Draw nakshatra ring
+function drawNakshatraRing() {
+  const g = document.getElementById('nakshatraRing');
+  const segAngle = 360 / 27;
+  
+  for (let i = 0; i < 27; i++) {
+    const startA = (i * segAngle - 90) * Math.PI / 180;
+    const endA = ((i + 1) * segAngle - 90) * Math.PI / 180;
+    const midA = ((i + 0.5) * segAngle - 90) * Math.PI / 180;
+    
+    // Arc segment
+    const innerR = NAK_R - 20;
+    const outerR = NAK_R + 8;
+    
+    const x1i = CX + innerR * Math.cos(startA);
+    const y1i = CY + innerR * Math.sin(startA);
+    const x2i = CX + innerR * Math.cos(endA);
+    const y2i = CY + innerR * Math.sin(endA);
+    const x1o = CX + outerR * Math.cos(startA);
+    const y1o = CY + outerR * Math.sin(startA);
+    const x2o = CX + outerR * Math.cos(endA);
+    const y2o = CY + outerR * Math.sin(endA);
+    
+    const path = document.createElementNS(SVG_NS, 'path');
+    path.setAttribute('d', 
+      `M ${x1i} ${y1i} A ${innerR} ${innerR} 0 0 1 ${x2i} ${y2i} L ${x2o} ${y2o} A ${outerR} ${outerR} 0 0 0 ${x1o} ${y1o} Z`
+    );
+    path.setAttribute('fill', i % 2 === 0 ? '#e4e0d8' : '#ded8ce');
+    path.setAttribute('stroke', '#c0b8a8');
+    path.setAttribute('stroke-width', '0.5');
+    path.setAttribute('id', `nak-seg-${i}`);
+    g.appendChild(path);
+    
+    // Label
+    const labelR = NAK_R + 22;
+    const lx = CX + labelR * Math.cos(midA);
+    const ly = CY + labelR * Math.sin(midA);
+    const rot = (i * segAngle + segAngle/2);
+    
+    const text = document.createElementNS(SVG_NS, 'text');
+    text.setAttribute('x', lx);
+    text.setAttribute('y', ly);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('dominant-baseline', 'central');
+    text.setAttribute('fill', '#8090a0');
+    text.setAttribute('font-size', '6.5');
+    text.setAttribute('font-family', 'Noto Sans');
+    text.setAttribute('font-weight', '400');
+    text.setAttribute('id', `nak-label-${i}`);
+    
+    // Rotate text to be readable
+    let textRot = rot;
+    if (textRot > 90 && textRot < 270) textRot += 180;
+    text.setAttribute('transform', `rotate(${textRot}, ${lx}, ${ly})`);
+    text.textContent = NAK_NAMES[i];
+    g.appendChild(text);
+  }
+}
+
+function polarToCart(angle, r) {
+  const a = (angle - 90) * Math.PI / 180;
+  return { x: CX + r * Math.cos(a), y: CY + r * Math.sin(a) };
+}
+
+function describeArc(cx, cy, r, startAngle, endAngle) {
+  const s = (startAngle - 90) * Math.PI / 180;
+  const e = (endAngle - 90) * Math.PI / 180;
+  let diff = endAngle - startAngle;
+  if (diff < 0) diff += 360;
+  const large = diff > 180 ? 1 : 0;
+  const sx = cx + r * Math.cos(s), sy = cy + r * Math.sin(s);
+  const ex = cx + r * Math.cos(e), ey = cy + r * Math.sin(e);
+  return `M ${sx} ${sy} A ${r} ${r} 0 ${large} 1 ${ex} ${ey}`;
+}
+
+function update(day) {
+  // Sun moves ~1° per day, Moon moves ~13.17° per day
+  // Over a synodic month (~29.53 days), Moon gains 360° on Sun
+  
+  const sunStartDeg = 0; // Sun's starting longitude
+  const sunDeg = sunStartDeg + day * (360 / 365.25); // ~1°/day
+  const moonDeg = sunStartDeg + day * (360 / 27.32); // sidereal motion
+  
+  // For Tithi: angular separation Moon - Sun
+  let separation = (moonDeg - sunDeg) % 360;
+  if (separation < 0) separation += 360;
+  
+  // Tithi number (0-29)
+  const tithiNum = Math.floor(separation / 12);
+  const tithiName = TITHI_NAMES[tithiNum];
+  const paksha = tithiNum < 15 ? "Shukla" : "Krishna";
+  const phaseIdx = Math.floor(tithiNum / 2);
+  const phaseIcon = MOON_PHASES[phaseIdx] || '🌑';
+  
+  // Nakshatra (Moon's absolute position mod 360, divided into 27)
+  let moonAbsolute = moonDeg % 360;
+  if (moonAbsolute < 0) moonAbsolute += 360;
+  const nakNum = Math.floor(moonAbsolute / (360/27));
+  const nakName = NAK_NAMES[nakNum % 27];
+  
+  // Yoga: (Moon + Sun) mod 360 / (360/27)
+  let yogaSum = (moonAbsolute + (sunDeg % 360 + 360) % 360) % 360;
+  const yogaNum = Math.floor(yogaSum / (360/27));
+  const yogaName = YOGA_NAMES[yogaNum % 27];
+  
+  // Karana: separation / 6 → index into 60 karanas
+  const karanaNum = Math.floor(separation / 6);
+  const karanaName = KARANA_CYCLE[karanaNum % 60];
+  
+  // Draw Sun (as a point on outer edge, indicating direction)
+  const sunG = document.getElementById('sunGroup');
+  sunG.innerHTML = '';
+  const sunPos = polarToCart(sunDeg % 360, RASHI_R + 22);
+  const sunNear = polarToCart(sunDeg % 360, RASHI_R + 18);
+
+  // Sun ray line from edge
+  const ray = document.createElementNS(SVG_NS, 'line');
+  ray.setAttribute('x1', sunNear.x); ray.setAttribute('y1', sunNear.y);
+  ray.setAttribute('x2', sunPos.x); ray.setAttribute('y2', sunPos.y);
+  ray.setAttribute('stroke', '#d08a1060'); ray.setAttribute('stroke-width', '2');
+  sunG.appendChild(ray);
+
+  // Sun circle
+  const sunC = document.createElementNS(SVG_NS, 'circle');
+  sunC.setAttribute('cx', sunPos.x); sunC.setAttribute('cy', sunPos.y);
+  sunC.setAttribute('r', '10'); sunC.setAttribute('fill', 'url(#sunGrad)');
+  sunC.setAttribute('filter', 'url(#sunGlow)');
+  sunG.appendChild(sunC);
+
+  const sunLabel = document.createElementNS(SVG_NS, 'text');
+  sunLabel.setAttribute('x', sunPos.x); sunLabel.setAttribute('y', sunPos.y + 18);
+  sunLabel.setAttribute('text-anchor', 'middle'); sunLabel.setAttribute('fill', '#b07808');
+  sunLabel.setAttribute('font-size', '8'); sunLabel.setAttribute('font-family', 'Noto Sans');
+  sunLabel.textContent = 'Sun';
+  sunG.appendChild(sunLabel);
+
+  // Moon position on orbit
+  const moonPos = polarToCart(moonAbsolute, ORBIT_R);
+  const moonOrb = document.getElementById('moonOrb');
+  moonOrb.setAttribute('cx', moonPos.x); moonOrb.setAttribute('cy', moonPos.y);
+  const moonLbl = document.getElementById('moonLabel');
+  moonLbl.setAttribute('x', moonPos.x); moonLbl.setAttribute('y', moonPos.y);
+
+  // Draw arcs
+  const arcsG = document.getElementById('arcsGroup');
+  arcsG.innerHTML = '';
+
+  // Tithi arc: from Sun direction to Moon direction (the separation)
+  const sunAngle = sunDeg % 360;
+  const moonAngle = moonAbsolute;
+  
+  // Tithi arc (Moon - Sun separation) - at radius 80
+  if (separation > 2) {
+    const tithiArc = document.createElementNS(SVG_NS, 'path');
+    tithiArc.setAttribute('d', describeArc(CX, CY, 80, sunAngle, moonAngle));
+    tithiArc.setAttribute('fill', 'none');
+    tithiArc.setAttribute('stroke', 'var(--tithi)');
+    tithiArc.setAttribute('stroke-width', '2.5');
+    tithiArc.setAttribute('stroke-dasharray', '6,3');
+    tithiArc.setAttribute('opacity', '0.7');
+    arcsG.appendChild(tithiArc);
+    
+    // Label at midpoint of arc
+    const midSep = sunAngle + separation / 2;
+    const tithiLabelPos = polarToCart(midSep, 68);
+    const tl = document.createElementNS(SVG_NS, 'text');
+    tl.setAttribute('x', tithiLabelPos.x); tl.setAttribute('y', tithiLabelPos.y);
+    tl.setAttribute('text-anchor', 'middle'); tl.setAttribute('fill', 'var(--tithi)');
+    tl.setAttribute('font-size', '8'); tl.setAttribute('font-family', 'Noto Sans');
+    tl.setAttribute('font-weight', '500');
+    tl.textContent = `${Math.round(separation)}°`;
+    arcsG.appendChild(tl);
+    
+    const tl2 = document.createElementNS(SVG_NS, 'text');
+    tl2.setAttribute('x', tithiLabelPos.x); tl2.setAttribute('y', tithiLabelPos.y + 11);
+    tl2.setAttribute('text-anchor', 'middle'); tl2.setAttribute('fill', 'var(--tithi)');
+    tl2.setAttribute('font-size', '7'); tl2.setAttribute('font-family', 'Noto Sans');
+    tl2.setAttribute('opacity', '0.7');
+    tl2.textContent = 'Moon − Sun';
+    arcsG.appendChild(tl2);
+  }
+
+  // Yoga: show the "sum" concept — line from Earth through the yoga point
+  const yogaAngle = yogaSum / 2; // The midpoint represents the "average" direction
+  const yogaPos = polarToCart(yogaSum, 105);
+  const yogaDot = document.createElementNS(SVG_NS, 'circle');
+  yogaDot.setAttribute('cx', yogaPos.x); yogaDot.setAttribute('cy', yogaPos.y);
+  yogaDot.setAttribute('r', '4'); yogaDot.setAttribute('fill', 'var(--yoga)');
+  yogaDot.setAttribute('opacity', '0.6'); yogaDot.setAttribute('filter', 'url(#softGlow)');
+  arcsG.appendChild(yogaDot);
+
+  const yogaLine = document.createElementNS(SVG_NS, 'line');
+  yogaLine.setAttribute('x1', CX); yogaLine.setAttribute('y1', CY);
+  yogaLine.setAttribute('x2', yogaPos.x); yogaLine.setAttribute('y2', yogaPos.y);
+  yogaLine.setAttribute('stroke', 'var(--yoga)'); yogaLine.setAttribute('stroke-width', '1');
+  yogaLine.setAttribute('stroke-dasharray', '3,4'); yogaLine.setAttribute('opacity', '0.4');
+  arcsG.appendChild(yogaLine);
+
+  const ylbl = document.createElementNS(SVG_NS, 'text');
+  const yogaLblPos = polarToCart(yogaSum, 118);
+  ylbl.setAttribute('x', yogaLblPos.x); ylbl.setAttribute('y', yogaLblPos.y);
+  ylbl.setAttribute('text-anchor', 'middle'); ylbl.setAttribute('fill', 'var(--yoga)');
+  ylbl.setAttribute('font-size', '7'); ylbl.setAttribute('font-family', 'Noto Sans');
+  ylbl.setAttribute('opacity', '0.8');
+  ylbl.textContent = `Yoga: ${Math.round(yogaSum)}°`;
+  arcsG.appendChild(ylbl);
+
+  // Highlight active Nakshatra segments
+  const curSunNakSeg = Math.floor(((sunDeg%360+360)%360)/(360/27)) % 27;
+  for (let i = 0; i < 27; i++) {
+    const seg = document.getElementById(`nak-seg-${i}`);
+    const lbl = document.getElementById(`nak-label-${i}`);
+    if (i === nakNum % 27 && i === curSunNakSeg) {
+      // Both in same segment
+      seg.setAttribute('fill', '#d8e0d0');
+      seg.setAttribute('stroke', '#6a9050');
+      seg.setAttribute('stroke-width', '2');
+      lbl.setAttribute('fill', '#3a7030');
+      lbl.setAttribute('font-size', '7.5');
+    } else if (i === nakNum % 27) {
+      seg.setAttribute('fill', '#c8d8f0');
+      seg.setAttribute('stroke', '#4a80c0');
+      seg.setAttribute('stroke-width', '1.5');
+      lbl.setAttribute('fill', '#2a60b0');
+      lbl.setAttribute('font-size', '7.5');
+    } else if (i === curSunNakSeg) {
+      seg.setAttribute('fill', '#f0e8d0');
+      seg.setAttribute('stroke', '#c0a040');
+      seg.setAttribute('stroke-width', '1.5');
+      lbl.setAttribute('fill', '#9a7a18');
+      lbl.setAttribute('font-size', '7');
+    } else {
+      seg.setAttribute('fill', i % 2 === 0 ? '#e4e0d8' : '#ded8ce');
+      seg.setAttribute('stroke', '#c0b8a8');
+      seg.setAttribute('stroke-width', '0.5');
+      lbl.setAttribute('fill', '#8090a0');
+      lbl.setAttribute('font-size', '6.5');
+    }
+  }
+
+  // Highlight Sun's Rashi
+  const sunAbsolute = ((sunDeg % 360) + 360) % 360;
+  const sunRashi = Math.floor(sunAbsolute / 30) % 12;
+  const moonRashi = Math.floor(moonAbsolute / 30) % 12;
+  
+  for (let i = 0; i < 12; i++) {
+    const seg = document.getElementById(`rashi-seg-${i}`);
+    const lbl = document.getElementById(`rashi-label-${i}`);
+    if (i === sunRashi) {
+      seg.setAttribute('fill', '#f5e8c8');
+      seg.setAttribute('stroke', '#c0a040');
+      seg.setAttribute('stroke-width', '1.5');
+      lbl.setAttribute('fill', '#8a6a10');
+      lbl.setAttribute('font-size', '9');
+      lbl.setAttribute('font-weight', '600');
+    } else if (i === moonRashi) {
+      seg.setAttribute('fill', '#dce8f4');
+      seg.setAttribute('stroke', '#7098c0');
+      seg.setAttribute('stroke-width', '1');
+      lbl.setAttribute('fill', '#4a70a0');
+      lbl.setAttribute('font-size', '8.5');
+      lbl.setAttribute('font-weight', '400');
+    } else {
+      seg.setAttribute('fill', i % 2 === 0 ? '#f4f0e8' : '#ece6dc');
+      seg.setAttribute('stroke', '#b8b0a0');
+      seg.setAttribute('stroke-width', '0.5');
+      lbl.setAttribute('fill', '#a09888');
+      lbl.setAttribute('font-size', '8');
+      lbl.setAttribute('font-weight', '400');
+    }
+  }
+
+  // Draw Sun-to-Nakshatra connector line extending to Rashi ring
+  const sunNakDir = polarToCart(sunAbsolute, RASHI_R + 18);
+  const sunRashiLine = document.createElementNS(SVG_NS, 'line');
+  sunRashiLine.setAttribute('x1', sunPos.x); sunRashiLine.setAttribute('y1', sunPos.y);
+  sunRashiLine.setAttribute('x2', sunNakDir.x); sunRashiLine.setAttribute('y2', sunNakDir.y);
+  sunRashiLine.setAttribute('stroke', '#d08a1020'); sunRashiLine.setAttribute('stroke-width', '1');
+  arcsG.appendChild(sunRashiLine);
+
+  // Update Nakshatra panel to show Rashi info
+  const sunRashiName = RASHI_NAMES[sunRashi];
+  const moonRashiName = RASHI_NAMES[moonRashi];
+
+  // Draw Earth-to-Sun line (faint)
+  const sunDir = polarToCart(sunAngle, NAK_R + 8);
+  const es = document.createElementNS(SVG_NS, 'line');
+  es.setAttribute('x1', CX); es.setAttribute('y1', CY);
+  es.setAttribute('x2', sunDir.x); es.setAttribute('y2', sunDir.y);
+  es.setAttribute('stroke', '#d08a1025'); es.setAttribute('stroke-width', '1');
+  arcsG.appendChild(es);
+
+  // Draw Earth-to-Moon line
+  const em = document.createElementNS(SVG_NS, 'line');
+  em.setAttribute('x1', CX); em.setAttribute('y1', CY);
+  em.setAttribute('x2', moonPos.x); em.setAttribute('y2', moonPos.y);
+  em.setAttribute('stroke', '#4a608030'); em.setAttribute('stroke-width', '1');
+  arcsG.appendChild(em);
+
+  // Update info panels
+  document.getElementById('tithiValue').innerHTML = 
+    `<span class="phase-icon">${phaseIcon}</span> ${paksha} ${tithiName} <span style="color:var(--dim);font-size:0.8rem">(${Math.round(separation)}° separation)</span>`;
+
+  document.getElementById('nakValue').innerHTML = 
+    `<span style="color:var(--nak)">☾</span> ${nakName} <span style="color:var(--dim);font-size:0.8rem">(#${(nakNum%27)+1}) → ${moonRashiName} Rāshi</span>` +
+    `<br><span style="font-size:0.82rem;color:var(--sun)">☉</span> <span style="font-size:0.82rem;">Sun in ${NAK_NAMES[curSunNakSeg]}</span> <span style="color:var(--dim);font-size:0.78rem">(#${curSunNakSeg+1}) → ${sunRashiName} Rāshi</span>`;
+
+  document.getElementById('yogaValue').innerHTML = 
+    `${yogaName} <span style="color:var(--dim);font-size:0.8rem">(sum: ${Math.round(yogaSum)}° → #${(yogaNum%27)+1})</span>`;
+  
+  const isVishti = karanaName === 'Vishṭi';
+  document.getElementById('karanaValue').innerHTML = 
+    `${isVishti ? '⚠️ ' : ''}${karanaName} <span style="color:var(--dim);font-size:0.8rem">(Tithi half ${(karanaNum%2)+1}/2)</span>` +
+    (isVishti ? ' <span style="color:var(--karana);font-size:0.75rem">— Bhadra!</span>' : '');
+
+  // Day label
+  const lunarMonth = Math.floor(separation === 0 ? 0 : (day / 29.53)) + 1;
+  const lunarDayInMonth = Math.floor(separation / 12) + 1;
+  const pakshaShort = tithiNum < 15 ? 'Sh' : 'Kr';
+  dayLabel.textContent = `Day ${Math.round(day)}`;
+  
+  // Update orbit counters
+  const curMoonNak = nakNum % 27;
+  const curSunNak = Math.floor(((sunDeg % 360 + 360) % 360) / (360/27)) % 27;
+  
+  if (day > lastDay) { // only count forward
+    if (prevMoonNak === 26 && curMoonNak === 0) moonOrbits++;
+    if (prevSunNak !== curSunNak) sunNaks++;
+    if (prevSunRashi !== sunRashi) sankCount++;
+  }
+  prevMoonNak = curMoonNak;
+  prevSunNak = curSunNak;
+  prevSunRashi = sunRashi;
+  lastDay = day;
+  
+  const synMonths = Math.floor(day / 29.53);
+  
+  document.getElementById('moonOrbCount').textContent = moonOrbits;
+  document.getElementById('sunNakCount').textContent = sunNaks;
+  document.getElementById('sankCount').textContent = sankCount;
+  document.getElementById('lunarMonthCount').textContent = synMonths;
+}
+
+// Nakshatra and Rashi rings
+drawRashiRing();
+drawNakshatraRing();
+
+// Slider
+slider.addEventListener('input', () => {
+  const v = parseFloat(slider.value);
+  // Reset counters if dragged backwards
+  if (v < lastDay) {
+    moonOrbits = 0; sunNaks = 0; sankCount = 0; prevMoonNak = 0; prevSunNak = 0; prevSunRashi = 0; lastDay = 0;
+    // Replay from 0 to recalculate counts
+    for (let d = 0; d <= v; d += 0.5) {
+      const sDeg = d * (360 / 365.25);
+      const mDeg = d * (360 / 27.32);
+      const mAbs = ((mDeg % 360) + 360) % 360;
+      const cn = Math.floor(mAbs / (360/27)) % 27;
+      const cs = Math.floor((((sDeg % 360) + 360) % 360) / (360/27)) % 27;
+      const cr = Math.floor((((sDeg % 360) + 360) % 360) / 30) % 12;
+      if (d > 0) {
+        if (prevMoonNak === 26 && cn === 0) moonOrbits++;
+        if (prevSunNak !== cs) sunNaks++;
+        if (prevSunRashi !== cr) sankCount++;
+      }
+      prevMoonNak = cn; prevSunNak = cs; prevSunRashi = cr; lastDay = d;
+    }
+  }
+  update(v);
+});
+
+// Animation
+let animValue = 0;
+function animate() {
+  animValue += 0.15 * speed;
+  if (animValue > 365) animValue = 0;
+  slider.value = animValue;
+  update(animValue);
+  if (animating) animFrame = requestAnimationFrame(animate);
+}
+
+playBtn.addEventListener('click', () => {
+  animating = !animating;
+  if (animating) {
+    animValue = parseFloat(slider.value);
+    if (animValue >= 365) { animValue = 0; moonOrbits = 0; sunNaks = 0; sankCount = 0; prevMoonNak = 0; prevSunNak = 0; prevSunRashi = 0; lastDay = 0; }
+    playBtn.textContent = '⏸ Pause';
+    animate();
+  } else {
+    cancelAnimationFrame(animFrame);
+    playBtn.textContent = '▶ Animate';
+  }
+});
+
+// Initial
+update(0);
+</script>
+</body>
+</html>
