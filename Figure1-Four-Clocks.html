@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  body { margin: 0; padding: 20px 10px; background: #FFFEF8; font-family: Georgia, serif; }
+  .container { width: 1000px; margin: 0 auto; text-align: center; }
+  .title { font-size: 22px; color: #8B4513; font-weight: bold; margin-bottom: 3px; }
+  .subtitle { font-size: 13px; color: #999; font-style: italic; margin-bottom: 18px; }
+  canvas { display: block; margin: 0 auto; }
+  
+  .boxes { display: flex; gap: 8px; margin-top: 22px; justify-content: center; }
+  .box { flex: 1; max-width: 230px; border: 2px solid; border-radius: 8px; padding: 10px 8px; text-align: center; }
+  .box h3 { margin: 0 0 5px 0; font-size: 15px; }
+  .box .math { font-size: 12.5px; color: #444; margin: 3px 0; }
+  .box .formula { font-size: 13.5px; font-weight: bold; margin: 5px 0; }
+  .box .label { font-size: 11.5px; color: #777; font-style: italic; margin-top: 5px; }
+  
+  .b-nk { border-color: #B8860B; background: #FDF5E6; }
+  .b-nk h3 { color: #8B6914; }
+  .b-yo { border-color: #8B7355; background: #F5F0E8; }
+  .b-yo h3 { color: #6B5B3E; }
+  .b-ti { border-color: #CD853F; background: #FFF8F0; }
+  .b-ti h3 { color: #A0522D; }
+  .b-ra { border-color: #6B8E23; background: #F0F5E8; }
+  .b-ra h3 { color: #4A6B10; }
+  
+  .temporal { margin-top: 18px; border: 2px solid #DDD; border-radius: 8px; padding: 14px 20px; background: #FAFAF5; }
+  .temporal h3 { color: #8B4513; font-size: 15px; margin: 0 0 10px 0; }
+  .temporal-row { display: flex; align-items: center; justify-content: center; gap: 18px; }
+  .temporal-col { text-align: center; }
+  .temporal-col .big { font-size: 18px; font-weight: bold; color: #333; }
+  .temporal-col .sm { font-size: 12px; color: #666; margin-top: 2px; }
+  .temporal-col .tiny { font-size: 11px; color: #999; }
+  .arrow-col { color: #8B4513; font-size: 13px; font-weight: bold; }
+  .arrow-col .arr { font-size: 22px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="title">Figure 1: Four Independent Clocks on One Sky</div>
+  <div class="subtitle">Rings deliberately offset — these clocks never align the same way twice</div>
+  <canvas id="rings" width="960" height="960"></canvas>
+  
+  <div class="boxes">
+    <div class="box b-nk">
+      <h3>27 Nakshatras</h3>
+      <div class="math">Moon alone · 13.2°/day</div>
+      <div class="formula">360° ÷ 13.33° = 27</div>
+      <div class="label">WHERE is the Moon?</div>
+    </div>
+    <div class="box b-yo">
+      <h3>27 Yogas</h3>
+      <div class="math">Moon + Sun · 14.2°/day</div>
+      <div class="formula">360° ÷ 13.33° = 27 (fastest)</div>
+      <div class="label">Combined ENERGY</div>
+    </div>
+    <div class="box b-ti">
+      <h3>30 Tithis</h3>
+      <div class="math">Moon − Sun · 12°/day</div>
+      <div class="formula">360° ÷ 12° = 30 (slowest)</div>
+      <div class="label">Moon's SEPARATION · Phase</div>
+    </div>
+    <div class="box b-ra">
+      <h3>12 Rāshis</h3>
+      <div class="math">Sun alone · 1°/day</div>
+      <div class="formula">360° ÷ 30° = 12</div>
+      <div class="label">Sun's monthly ARC</div>
+    </div>
+  </div>
+  
+  <div class="temporal">
+    <h3>TEMPORAL REALITY: Same 27 × 13°20′, Different Clocks</h3>
+    <div class="temporal-row">
+      <div class="temporal-col">
+        <div style="font-size:13px; font-weight:bold; color:#8B6914;">SIDEREAL MONTH</div>
+        <div class="big">27.32 days</div>
+        <div class="sm">Moon returns to same star</div>
+        <div class="tiny">= 27 Nakshatras completed</div>
+      </div>
+      <div class="arrow-col">
+        <div>+2.21 days</div>
+        <div class="arr">→</div>
+        <div style="font-size:11px; color:#888;">Sun moves ~27°</div>
+        <div style="font-size:11px; color:#888;">Moon must catch up</div>
+      </div>
+      <div class="temporal-col">
+        <div style="font-size:13px; font-weight:bold; color:#A0522D;">SYNODIC MONTH</div>
+        <div class="big">29.53 days</div>
+        <div class="sm">Moon returns to same phase</div>
+        <div class="tiny">= 30 Tithis completed</div>
+      </div>
+      <div class="arrow-col" style="margin-left:25px;">
+        <div style="font-size:12px; color:#555;">Yoga ticks <b>FASTEST</b></div>
+        <div style="font-size:11px; color:#888;">~21 hrs per Yoga</div>
+        <div style="font-size:12px; color:#555; margin-top:4px;">Tithi ticks <b>SLOWEST</b></div>
+        <div style="font-size:11px; color:#888;">~23.6 hrs per Tithi</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('rings');
+const ctx = canvas.getContext('2d');
+const W = 960, H = 960;
+const cx = W/2, cy = H/2 + 10;
+
+const nakshatras = [
+  'Ashwinī','Bharaṇī','Kṛttikā','Rohiṇī','Mṛgashīrsha','Ārdrā','Punarvasu',
+  'Pushya','Āshleshā','Maghā','P.Phālgunī','U.Phālgunī','Hasta','Chitrā',
+  'Svātī','Vishākhā','Anurādhā','Jyeshṭhā','Mūla','P.Āshāḍhā','U.Āshāḍhā',
+  'Shravana','Dhaniṣhṭhā','Shatabhishā','P.Bhādrapadā','U.Bhādrapadā','Revatī'
+];
+
+const rashis = [
+  'Mesha','Vṛṣhabha','Mithuna','Karka','Siṃha','Kanyā',
+  'Tulā','Vṛshchika','Dhanu','Makara','Kumbha','Mīna'
+];
+
+const yogaNames = [
+  'Vishkambha','Prīti','Āyushmān','Saubhāgya','Shobhana','Atigaṇḍa','Sukarma',
+  'Dhṛti','Shūla','Gaṇḍa','Vṛddhi','Dhruva','Vyāghāta','Harshana',
+  'Vajra','Siddhi','Vyatīpāta','Variyas','Parigha','Shiva','Siddha',
+  'Sādhya','Shubha','Shukla','Brahma','Indra','Vaidhṛti'
+];
+
+const tithiNames = [
+  'S1','S2','S3','S4','S5','S6','S7','S8','S9','S10','S11','S12','S13','S14','S15',
+  'K1','K2','K3','K4','K5','K6','K7','K8','K9','K10','K11','K12','K13','K14','K15'
+];
+
+// Ring radii
+const R = {
+  nkOut: 430, nkIn: 360,
+  yoOut: 355, yoIn: 290,
+  tiOut: 285, tiIn: 215,
+  raOut: 210, raIn: 140,
+  center: 136
+};
+
+// Offsets to show rings spin independently
+const OFF = { nk: 0, yo: 0.18, ti: -0.28, ra: 0.1 };
+
+// Color palettes
+function mkColors(base, n) {
+  const cols = [];
+  for(let i = 0; i < n; i++) {
+    const t = i / n;
+    const r = base[0] + Math.sin(t * Math.PI * 2 + 0) * base[3];
+    const g = base[1] + Math.sin(t * Math.PI * 2 + 2) * base[4];
+    const b = base[2] + Math.sin(t * Math.PI * 2 + 4) * base[5];
+    cols.push(`rgb(${Math.round(r)},${Math.round(g)},${Math.round(b)})`);
+  }
+  return cols;
+}
+
+const nkCols = mkColors([228,210,165, 15,12,18], 27);
+const yoCols = mkColors([198,186,158, 12,10,14], 27);
+const tiCols = mkColors([222,195,158, 14,12,16], 30);
+const raCols = mkColors([180,200,145, 16,14,12], 12);
+
+function drawSegment(rOut, rIn, a1, a2, fill, stroke) {
+  ctx.beginPath();
+  ctx.arc(cx, cy, rOut, a1, a2);
+  ctx.arc(cx, cy, rIn, a2, a1, true);
+  ctx.closePath();
+  ctx.fillStyle = fill;
+  ctx.fill();
+  if(stroke) {
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+  }
+}
+
+function drawCurvedText(text, r, midAngle, fontSize, color, bold) {
+  // Place text along arc - but render as straight text at midpoint
+  const x = cx + Math.cos(midAngle) * r;
+  const y = cy + Math.sin(midAngle) * r;
+  
+  ctx.save();
+  ctx.translate(x, y);
+  
+  // Rotate to be tangent to circle, but flip if in bottom half so never upside-down
+  let rot = midAngle + Math.PI/2;
+  // Normalize
+  while(rot < 0) rot += Math.PI*2;
+  while(rot >= Math.PI*2) rot -= Math.PI*2;
+  // If text would be upside-down, flip 180
+  if(rot > Math.PI/2 && rot < Math.PI*3/2) {
+    rot += Math.PI;
+  }
+  ctx.rotate(rot);
+  
+  ctx.fillStyle = color;
+  ctx.font = (bold ? 'bold ' : '') + fontSize + 'px Georgia';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, 0, 0);
+  ctx.restore();
+}
+
+function drawRing(rOut, rIn, n, labels, colors, offset, textColor, fontSize, bold) {
+  const step = Math.PI * 2 / n;
+  for(let i = 0; i < n; i++) {
+    const a1 = -Math.PI/2 + i * step + offset;
+    const a2 = a1 + step;
+    drawSegment(rOut, rIn, a1, a2, colors[i], 'rgba(255,255,255,0.7)');
+    
+    if(labels && labels[i]) {
+      const midA = (a1 + a2) / 2;
+      const textR = (rOut + rIn) / 2;
+      drawCurvedText(labels[i], textR, midA, fontSize || 10, textColor || '#333', bold);
+    }
+  }
+  
+  // Outer border
+  ctx.beginPath();
+  ctx.arc(cx, cy, rOut, 0, Math.PI*2);
+  ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  
+  // Inner border
+  ctx.beginPath();
+  ctx.arc(cx, cy, rIn, 0, Math.PI*2);
+  ctx.stroke();
+}
+
+// Draw rings, outer to inner
+drawRing(R.nkOut, R.nkIn, 27, nakshatras, nkCols, OFF.nk, '#5C4A1E', 10.5, false);
+drawRing(R.yoOut, R.yoIn, 27, yogaNames, yoCols, OFF.yo, '#4A3E2A', 9, false);
+drawRing(R.tiOut, R.tiIn, 30, tithiNames, tiCols, OFF.ti, '#6B4226', 10, true);
+drawRing(R.raOut, R.raIn, 12, rashis, raCols, OFF.ra, '#2E4A10', 13, true);
+
+// Center circle
+ctx.beginPath();
+ctx.arc(cx, cy, R.center, 0, Math.PI*2);
+const cg = ctx.createRadialGradient(cx, cy, 20, cx, cy, R.center);
+cg.addColorStop(0, '#FFFEF5');
+cg.addColorStop(1, '#FBF5E8');
+ctx.fillStyle = cg;
+ctx.fill();
+ctx.strokeStyle = '#C8B080';
+ctx.lineWidth = 1.5;
+ctx.stroke();
+
+// Center text
+ctx.fillStyle = '#8B4513';
+ctx.font = 'bold 44px Georgia';
+ctx.textAlign = 'center';
+ctx.fillText('360°', cx, cy - 38);
+
+ctx.fillStyle = '#555';
+ctx.font = '16px Georgia';
+ctx.fillText('One Sky', cx, cy - 8);
+ctx.font = '15px Georgia';
+ctx.fillText('Four Independent Clocks', cx, cy + 16);
+
+ctx.fillStyle = '#888';
+ctx.font = 'italic 12px Georgia';
+ctx.fillText('Each ring spins at its', cx, cy + 42);
+ctx.fillText('own speed. They never', cx, cy + 57);
+ctx.fillText('align the same way twice.', cx, cy + 72);
+
+ctx.fillStyle = '#8B4513';
+ctx.font = 'bold 16px Georgia';
+ctx.fillText('27  |  27  |  30  |  12', cx, cy + 98);
+
+// ---- Speed annotation arrows ----
+function drawAnnotation(fromAngle, fromR, toX, toY, text1, text2, color) {
+  const sx = cx + Math.cos(fromAngle) * fromR;
+  const sy = cy + Math.sin(fromAngle) * fromR;
+  
+  // Line
+  ctx.beginPath();
+  ctx.moveTo(sx, sy);
+  ctx.lineTo(toX, toY);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.2;
+  ctx.setLineDash([3,3]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  
+  // Dot at ring
+  ctx.beginPath();
+  ctx.arc(sx, sy, 3, 0, Math.PI*2);
+  ctx.fillStyle = color;
+  ctx.fill();
+  
+  // Text
+  ctx.fillStyle = color;
+  ctx.font = 'bold 13px Georgia';
+  ctx.textAlign = toX < cx ? 'right' : 'left';
+  const tx = toX < cx ? toX - 6 : toX + 6;
+  ctx.fillText(text1, tx, toY - 2);
+  ctx.font = '11px Georgia';
+  ctx.fillStyle = '#888';
+  ctx.fillText(text2, tx, toY + 14);
+}
+
+// Moon/Nakshatra - top right
+drawAnnotation(-0.5, R.nkOut, 820, 72, 'Moon: 13.2°/day', '1 Nakshatra ≈ 1 day', '#8B6914');
+
+// Yoga - top left
+drawAnnotation(Math.PI + 0.55, R.yoOut, 105, 112, 'M+S: 14.2°/day', '1 Yoga ≈ 21 hrs (fastest)', '#5C4A2A');
+
+// Tithi - bottom left
+drawAnnotation(Math.PI - 0.4, R.tiOut, 95, 680, 'M−S: 12°/day', '1 Tithi ≈ 23.6 hrs (slowest)', '#A0522D');
+
+// Sun/Rāshi - bottom right
+drawAnnotation(0.3, R.raOut, 820, 730, 'Sun: 1°/day', '1 Rāshi = 30 days', '#4A6B10');
+</script>
+</body>
+</html>
